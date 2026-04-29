@@ -1,0 +1,279 @@
+<!-- ═══════════════════════════════════════════════════════════
+     MODIFICATIONS À FAIRE DANS VOTRE index.html
+     ═══════════════════════════════════════════════════════════
+
+     3 ENDROITS À MODIFIER :
+     ────────────────────────────────────────────────────────
+     1. Dans le <head> → ajouter manifest + meta PWA
+     2. Avant </body> → ajouter le panneau admin + bouton notif
+     3. Dans le <script> inline → ajouter le code JS PWA
+
+     REMPLACEZ "https://VOTRE_WORKER_PUSH_URL.workers.dev"
+     par l'URL de votre nouveau Worker push.
+     ═══════════════════════════════════════════════════════════ -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     BLOC 1 — À coller dans le <head>, après le <title>
+     ═══════════════════════════════════════════════════════════ -->
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ode">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <meta name="theme-color" content="#003d7a">
+
+<!-- FIN BLOC 1 -->
+
+
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     BLOC 2 — CSS à ajouter dans votre <style>, à la fin
+     ═══════════════════════════════════════════════════════════ -->
+<style>
+/* ── Bannière installation PWA ── */
+#pwa-banner{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:9990;
+  background:var(--blue);color:#fff;padding:12px 16px;
+  flex-direction:row;align-items:center;gap:12px;
+  box-shadow:0 -4px 20px rgba(0,0,0,.3);
+}
+#pwa-banner.show{display:flex}
+#pwa-banner img{width:36px;height:36px;border-radius:8px;flex-shrink:0}
+#pwa-banner-text{flex:1;font-size:13px;line-height:1.4}
+#pwa-banner-text strong{display:block;font-size:14px;margin-bottom:2px}
+.pwa-btn{padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:none;flex-shrink:0}
+.pwa-install{background:var(--gold,#e8a020);color:#fff}
+.pwa-dismiss{background:rgba(255,255,255,.15);color:#fff}
+
+/* ── Panneau admin notifications ── */
+#admin-panel{
+  display:none;position:fixed;bottom:80px;right:16px;z-index:9990;
+  background:#fff;border-radius:16px;padding:16px;width:300px;
+  box-shadow:0 8px 40px rgba(0,0,0,.25);border:1px solid var(--gray-bd,#ddd);
+}
+#admin-panel.open{display:block}
+#admin-panel h4{margin:0 0 10px;font-size:14px;color:var(--ink,#1a2a3a)}
+#admin-panel textarea{width:100%;box-sizing:border-box;border:1px solid var(--gray-bd,#ddd);border-radius:8px;padding:8px;font-size:13px;resize:vertical;min-height:70px;font-family:inherit}
+#admin-panel input[type=text]{width:100%;box-sizing:border-box;border:1px solid var(--gray-bd,#ddd);border-radius:8px;padding:8px;font-size:13px;margin-bottom:8px;font-family:inherit}
+.admin-row{display:flex;gap:8px;margin-top:10px}
+.admin-send{flex:1;background:var(--blue,#003d7a);color:#fff;border:none;border-radius:10px;padding:9px;font-size:13px;font-weight:600;cursor:pointer}
+.admin-close{background:var(--gray-bd,#eee);border:none;border-radius:10px;padding:9px 12px;cursor:pointer;font-size:13px}
+#admin-stats{font-size:11px;color:var(--gray-mid,#888);margin-top:6px;text-align:right}
+
+/* ── Bouton flottant admin (caché par défaut) ── */
+#admin-fab{
+  display:none;position:fixed;bottom:16px;right:16px;z-index:9989;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--blue,#003d7a);color:#fff;border:none;
+  font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.3);
+  align-items:center;justify-content:center;
+}
+#admin-fab.show{display:flex}
+</style>
+<!-- FIN BLOC 2 -->
+
+
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     BLOC 3 — HTML à ajouter juste avant </body>
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- Bannière installation PWA -->
+<div id="pwa-banner">
+  <img src="/icon-192.png" alt="Ode">
+  <div id="pwa-banner-text">
+    <strong>Installer l'application</strong>
+    Accès rapide + alertes de la commune
+  </div>
+  <button class="pwa-btn pwa-install" onclick="pwaInstall()">Installer</button>
+  <button class="pwa-btn pwa-dismiss" onclick="pwaDismiss()">✕</button>
+</div>
+
+<!-- Panneau admin envoi notification -->
+<div id="admin-panel">
+  <h4>🔔 Envoyer une alerte aux citoyens</h4>
+  <input type="text" id="admin-notif-title" placeholder="Titre (ex: Coupure d'eau)" value="Commune de Sainte-Ode">
+  <textarea id="admin-notif-body" placeholder="Message de l'alerte…"></textarea>
+  <div id="admin-stats"></div>
+  <div class="admin-row">
+    <button class="admin-close" onclick="document.getElementById('admin-panel').classList.remove('open')">Annuler</button>
+    <button class="admin-send" onclick="adminSendNotif()">📣 Envoyer à tous</button>
+  </div>
+</div>
+
+<!-- Bouton flottant admin (visible seulement après mot de passe) -->
+<button id="admin-fab" title="Panneau admin" onclick="document.getElementById('admin-panel').classList.toggle('open')">📣</button>
+
+<!-- FIN BLOC 3 -->
+
+
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     BLOC 4 — JavaScript à ajouter dans votre <script> inline
+               (à la toute fin, avant le dernier })
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+/* ════════════════════════════════════════════════════════════
+   PWA — Service Worker + Notifications Push
+   ════════════════════════════════════════════════════════════ */
+
+const PUSH_WORKER_URL = 'https://VOTRE_WORKER_PUSH_URL.workers.dev';
+const ADMIN_SECRET    = 'VOTRE_MOT_DE_PASSE_ADMIN'; /* ← changer ici */
+
+let _swRegistration  = null;
+let _deferredPrompt  = null;
+let _pushSubscription = null;
+
+/* ── Enregistrement du Service Worker ── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    _swRegistration = reg;
+    console.info('[Ode PWA] SW enregistré');
+    /* Demander permission notifications après 3s */
+    setTimeout(requestPushPermission, 3000);
+  }).catch(function(e) {
+    console.warn('[Ode PWA] SW échec:', e);
+  });
+}
+
+/* ── Bannière installation ── */
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _deferredPrompt = e;
+  /* Afficher la bannière seulement si pas encore installé */
+  if (!window.matchMedia('(display-mode: standalone)').matches) {
+    document.getElementById('pwa-banner').classList.add('show');
+  }
+});
+
+function pwaInstall() {
+  document.getElementById('pwa-banner').classList.remove('show');
+  if (_deferredPrompt) {
+    _deferredPrompt.prompt();
+    _deferredPrompt.userChoice.then(function(r) {
+      if (r.outcome === 'accepted') console.info('[Ode PWA] Installée');
+      _deferredPrompt = null;
+    });
+  }
+}
+
+function pwaDismiss() {
+  document.getElementById('pwa-banner').classList.remove('show');
+  sessionStorage.setItem('pwa-dismissed', '1');
+}
+
+/* ── Abonnement notifications push ── */
+async function requestPushPermission() {
+  if (!('PushManager' in window) || !_swRegistration) return;
+  if (sessionStorage.getItem('push-declined')) return;
+
+  try {
+    /* Récupérer la clé VAPID publique depuis le worker */
+    const res     = await fetch(PUSH_WORKER_URL + '/vapid-public-key');
+    const { publicKey } = await res.json();
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      sessionStorage.setItem('push-declined', '1');
+      return;
+    }
+
+    /* S'abonner */
+    const sub = await _swRegistration.pushManager.subscribe({
+      userVisibleOnly:      true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey)
+    });
+
+    _pushSubscription = sub;
+
+    /* Envoyer l'abonnement au worker */
+    await fetch(PUSH_WORKER_URL + '/subscribe', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(sub.toJSON())
+    });
+
+    console.info('[Ode PWA] Abonné aux notifications');
+
+  } catch(e) {
+    console.warn('[Ode PWA] Push échec:', e);
+  }
+}
+
+/* Convertit la clé VAPID base64 en Uint8Array */
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = window.atob(base64);
+  const out     = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
+/* ── Panneau admin ── */
+/* Activer le FAB admin avec un mot de passe (triple-tap sur le footer) ── */
+let _adminTaps = 0;
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.page-footer')) {
+    _adminTaps++;
+    if (_adminTaps >= 5) {
+      const pwd = prompt('Mot de passe admin :');
+      if (pwd === ADMIN_SECRET) {
+        document.getElementById('admin-fab').classList.add('show');
+        adminLoadStats();
+      }
+      _adminTaps = 0;
+    }
+    setTimeout(function(){ _adminTaps = 0; }, 2000);
+  }
+});
+
+async function adminLoadStats() {
+  try {
+    const res  = await fetch(PUSH_WORKER_URL + '/stats', {
+      headers: { 'Authorization': 'Bearer ' + ADMIN_SECRET }
+    });
+    const data = await res.json();
+    document.getElementById('admin-stats').textContent =
+      data.subscribers + ' citoyen(s) abonné(s) aux alertes';
+  } catch(e) {}
+}
+
+async function adminSendNotif() {
+  const title = document.getElementById('admin-notif-title').value.trim();
+  const body  = document.getElementById('admin-notif-body').value.trim();
+  if (!body) { alert('Écrivez un message.'); return; }
+
+  const btn = document.querySelector('.admin-send');
+  btn.disabled = true;
+  btn.textContent = 'Envoi…';
+
+  try {
+    const res  = await fetch(PUSH_WORKER_URL + '/notify', {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + ADMIN_SECRET
+      },
+      body: JSON.stringify({ title, body })
+    });
+    const data = await res.json();
+    alert('✅ ' + data.sent + ' notification(s) envoyée(s).');
+    document.getElementById('admin-notif-body').value = '';
+    document.getElementById('admin-panel').classList.remove('open');
+    adminLoadStats();
+  } catch(e) {
+    alert('❌ Erreur : ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📣 Envoyer à tous';
+  }
+}
+</script>
+<!-- FIN BLOC 4 -->
