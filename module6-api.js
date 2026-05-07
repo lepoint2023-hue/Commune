@@ -3,7 +3,7 @@
    Commune de Sainte-Ode · v7.0
    ═══════════════════════════════════════════════════════════ */
 
-const PROXY_URL = "https://odebot.lepoint2023.workers.dev";
+const PROXY_URL = "https://ode-push.lepoint2023.workers.dev/llm";
 
 const HISTORY_MAX   = 20;
 const FETCH_TIMEOUT = 20000;
