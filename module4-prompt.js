@@ -54,7 +54,7 @@ ${safeId ? `Service choisi : **${svcLabel}**. Priorité à ce domaine.` : ''}
 - 3ème Échevine : Alexandra MEUNIER | +32 470 52 81 58 | alexandra.meunier@sainte-ode.be
   Compétences : Enseignement, Enfance, Jeunesse, Sport, Bien-être animal
 - Présidente CPAS : Sophie RASKIN | +32 497 44 21 33 | sophie.raskin@sainte-ode.be
-  Compétences : Social, Santé, Logement, Aînés, Emploi
+  Compétences : Social, Santé, Logement, Aînés, Emploi, Espace Public Numérique
 
 ### Conseillers communaux
 - Léon LIÉGEOIS (Com'Vous) | GSM : +32 496 12 61 68 | leon.liegeois@sainte-ode.be
@@ -65,7 +65,7 @@ ${safeId ? `Service choisi : **${svcLabel}**. Priorité à ce domaine.` : ''}
 
 ## CONTACTS PAR SERVICE
 - Direction générale : Charlotte LEDUC | +32 61 21 04 42 | charlotte.leduc@sainte-ode.be
-- Population / Salles / Logements / Étrangers : Catherine LEMAIRE | +32 61 21 04 45 | catherine.lemaire@sainte-ode.be
+- Population / Étrangers : Catherine LEMAIRE | +32 61 21 04 45 | catherine.lemaire@sainte-ode.be
 - Population : Séverine JACOB | +32 61 21 04 40 | population@sainte-ode.be
 - Population : Valérie BODELET | +32 61 21 04 41 | valerie.bodelet@sainte-ode.be
 - Enseignement / Culture / Cimetières : Éloïse LONGUEVILLE | +32 61 24 23 84 | eloise.longueville@sainte-ode.be
@@ -81,7 +81,7 @@ ${safeId ? `Service choisi : **${svcLabel}**. Priorité à ce domaine.` : ''}
 - Travaux (chef) : Miguel COMBREXELLE | +32 61 21 04 40 | mob : +32 470 70 27 11 | miguel.combrexelle@sainte-ode.be
 - Travaux (responsable) : Vincent WERNER | mob : +32 479 93 42 19 | vincent.werner@sainte-ode.be
 - Énergie & Climat : Pauline BERG | +32 61 24 23 85 | pauline.berg@sainte-ode.be
-- EPN (aide numérique) : Nicolas DERMINE | mob : +32 473 73 02 90 | nicolas.dermine@sainte-ode.be | epn@sainte-ode.be
+- EPN (aide numérique) : Nicolas DERMINE | mob : +32 473 73 02 90 | nicolas.dermine@sainte-ode.be
 - Crèche "L'Ode aux Câlins" : Céline LAMBERT | +32 61 50 26 20 | creche@sainte-ode.be
 - ATL administratif : Florence PIRON | +32 61 28 72 82 | florence.piron.atl@sainte-ode.be
 - ATL / Plaines : Florine LERICHE | mob : +32 477 78 46 84 | plaines@sainte-ode.be
@@ -94,7 +94,7 @@ ${safeId ? `Service choisi : **${svcLabel}**. Priorité à ce domaine.` : ''}
 - Police locale : Grégory THILL / Sébastien VANLIERDE | +32 61 68 80 11
 - ADL : Sophie BOSQUÉE | +32 61 21 04 47 | adl@sainte-ode.be
 - ALE : Françoise BOZAR | mob : +32 497 49 39 98 | ale.stode@belgacom.net
-- Écrivain public : +32 61 24 23 82 | ecrivain@sainte-ode.be
+- Écrivain public : Michelle Delsemme | mob : +32 61 24 23 82 | ecrivain@sainte-ode.be
 - Déchets IDELUX : +32 63 23 18 11 | https://www.idelux.be
 
 ⚠️ CPAS : NE PAS introduire ni expliquer ce qu'est le CPAS. Aller directement aux services pratiques et aux contacts. Présenter l'équipe avec leurs spécialités et horaires de permanence.
@@ -171,11 +171,13 @@ ${safeId ? `Service choisi : **${svcLabel}**. Priorité à ce domaine.` : ''}
 - Collecte poubelles : calendrier sur https://www.idelux.be ou +32 63 23 18 11
 - Duobac cassé : IDELUX +32 63 23 18 11
 - Dépôt sauvage : Laurent Raskin | +32 499 77 57 79
-- Sacs PMC : 6 EUR le rouleau, disponibles à la commune
+- Sacs PMC : 6 EUR le rouleau, disponibles à la commune et dans certains commerces de la commune
 - Brûlage branches : interdit en Wallonie sauf dérogation → Laurent Raskin
 - Nuisibles/rats/frelons : Laurent Raskin | +32 499 77 57 79
 - Environnement (Directrice) : Christelle Mahin | +32 473 18 46 98
-- École Lavacherie : +32 61 68 91 16 | ecole.lavacherie@sainte-ode.be
+- École Lavacherie (Directrice) : Christelle Mahin | mob : +32473184698 | +32 61 68 91 16 | ecole.lavacherie@sainte-ode.be
+- École Tillet (Directrice) : Amandine Lambert | mob : +32495914688 | +3261689119 | ecole.tillet@sainte-ode.be
+- École Rechrival (Directrice) : Stéphanie Misson | mob : +32495914687 | ecole.rechrival@sainte-ode.be
 
 ## RÉGLEMENTATION BRUIT / TONDEUSE À GAZON
 Arrêté royal du 24/02/1977 (bruit en plein air) — applicable en Wallonie :
@@ -184,25 +186,25 @@ Arrêté royal du 24/02/1977 (bruit en plein air) — applicable en Wallonie :
 - Engins électriques silencieux : tolérance plus large mais respect du voisinage conseillé
 - En dehors de ces horaires : nuisance sonore pouvant faire l'objet d'un PV (agent constatateur : Laurent Raskin | +32 499 77 57 79)
 - Contact : laurent.raskin@sainte-ode.be
-- Permis construire (garage, véranda, clôture) : vérifier urbanisme +32 61 21 04 46
+- Permis construire (garage, véranda, clôture) : Audrey Carpentier | +3261210446 | vérifier urbanisme +32 61 21 04 46
 - Construction illégale voisin : Laurent Raskin | +32 499 77 57 79
 - Nid-de-poule, égout bouché : Miguel Combrexelle | +32 470 70 27 11
 - Arbre tombé (urgence) : +32 470 70 27 11 (Miguel) ou +32 479 93 42 19 (Vincent)
 - Lampadaire en panne : Miguel Combrexelle | +32 61 21 04 40
-- Réserver salle : https://sainteode.guichet-citoyen.be/ ou Catherine Lemaire +32 61 21 04 45
+- Réserver salle : https://sainteode.guichet-citoyen.be/ ou Séverine Jacob +32 61 21 04 40
 - Organiser événement : Audrey Carpentier | +32 61 21 04 46 (idéalement 2 mois avant)
 - Plaines vacances : https://apschool.be/ ou Florine Leriche | +32 477 78 46 84
 - Allergies enfant plaines : signaler à Florine Leriche à l'inscription
 - Crèche infos : Céline Lambert | +32 61 50 26 20 | creche@sainte-ode.be
-- Aide numérique gratuite : Nicolas Dermine | +32 473 73 02 90 | nicolas.dermine@sainte-ode.be
+- Aide numérique : Nicolas Dermine | +32 473 73 02 90 | nicolas.dermine@sainte-ode.be | doit être utilisé si il y a un rapport au numérique
 - Borne recharge VE : Rue des Trois Ponts 46, 0,77 EUR/kWh
 - Postuler commune : https://www.sainte-ode.be/actualites | Catherine Chantraine | rh@sainte-ode.be
-- Logement communal : Catherine Lemaire | +32 61 21 04 45
+- Logement communal : Séverine Jacob | +32 61 21 04 40
 - Primes énergie (isolation, solaire) : https://www.energievivante.be ou https://www.renovpass.be
-- Écrivain public : +32 61 24 23 82 | ecrivain@sainte-ode.be
+- Écrivain public : Michelle Delsemme +32 61 24 23 82 | ecrivain@sainte-ode.be
 - Délibérations conseil : https://www.deliberations.be/sainte-ode/publications
 - Primes agricoles : SPW Agriculture | https://www.wallonie.be/fr/agriculture
-- Dégâts gibier : DNF (Département Nature et Forêts)
+- Dégâts gibier : DNF (Département Nature et Forêts) Stéphane Abras (Chef de cantonnement) | mob : +32479860141 | stephane.abras@spw.wallonie.be
 - ALE emploi : Françoise Bozar | +32 497 49 39 98 | ale.stode@belgacom.net
 
 ## RÈGLES DE RÉPONSE
