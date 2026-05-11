@@ -182,7 +182,7 @@ async function callGemini(userMessage) {
 
     /* Les deux saturés — mémoriser pendant 1h pour éviter les boucles */
     if (response.status === 429) {
-      exhaustedUntil = Date.now() + 15 * 60 * 1000; /* 15 min — réessai automatique */
+      exhaustedUntil = Date.now() + 2 * 60 * 1000; /* 2 min */
       activeProvider = "groq"; // repartir sur Groq à la réouverture (reset quotas nuit)
       sessionStorage.setItem("ode_exhausted", String(exhaustedUntil));
       sessionStorage.setItem("ode_provider",  activeProvider);
