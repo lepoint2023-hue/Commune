@@ -71,27 +71,34 @@ self.addEventListener('fetch', function(e) {
 
 /* ── Push : affichage de la notification ── */
 self.addEventListener('push', function(e) {
-  let data = { title: 'Commune de Sainte-Ode', body: 'Nouveau message de la commune.' };
-  try {
-    if (e.data) data = e.data.json();
-  } catch(err) {
-    if (e.data) data.body = e.data.text();
+  let data = { title: 'Commune de Sainte-Ode', body: '', icon: '/Commune/icon-192.png', url: '/Commune/' };
+  if (e.data) {
+    try { Object.assign(data, e.data.json()); }
+    catch(err) { data.body = e.data.text(); }
   }
 
-  const options = {
-    body:    data.body,
-    icon:    '/Commune/blason-sainte-ode.jpg',
-    badge:   '/Commune/blason-sainte-ode.jpg',
-    vibrate: [100, 50, 100],
-    data:    { url: data.url || '/Commune/' },
-    actions: [
-      { action: 'open',    title: 'Ouvrir' },
-      { action: 'dismiss', title: 'Fermer' }
-    ]
-  };
-
+  /* Envoyer le contenu aux clients ouverts (onglets/app) */
   e.waitUntil(
-    self.registration.showNotification(data.title, options)
+    self.clients.matchAll({ type:'window', includeUncontrolled:true }).then(function(clients) {
+      clients.forEach(function(client) {
+        client.postMessage({ type:'PUSH_RECEIVED', title:data.title, body:data.body, url:data.url });
+      });
+    }).then(function() {
+      return self.registration.showNotification(data.title, {
+        body:            data.body,
+        icon:            data.icon || '/Commune/icon-192.png',
+        badge:           '/Commune/icon-192.png',
+        vibrate:         [200, 100, 200, 100, 400],
+        requireInteraction: true,
+        tag:             'ode-alerte',
+        renotify:        true,
+        data:            { url: data.url || '/Commune/' },
+        actions: [
+          { action:'open',    title:'📖 Voir le détail' },
+          { action:'dismiss', title:'✕ Fermer' }
+        ]
+      });
+    })
   );
 });
 
