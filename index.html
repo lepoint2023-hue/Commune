@@ -1364,6 +1364,12 @@ let _deferred   = null;
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/Commune/sw.js').then(function(reg) {
     _swReg = reg;
+    /* ── Écouter les push reçus depuis le Service Worker ── */
+    navigator.serviceWorker.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'PUSH_RECEIVED') {
+        _showPushInApp(e.data.title, e.data.body);
+      }
+    });
     setTimeout(requestPush, 4000);
   }).catch(function(e){ console.warn('[PWA]', e); });
 }
