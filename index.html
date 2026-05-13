@@ -1517,6 +1517,42 @@ async function adminSendNotif() {
     adminLoadStats();
   } catch(e) { alert('❌ ' + e.message); }
   finally { btn.disabled = false; btn.textContent = '📡 Diffuser'; }
+  function _showPushInApp(title, body) {
+  /* Créer ou réutiliser le bandeau push dans le chat */
+  var existing = document.getElementById('push-notif-bar');
+  if (existing) existing.remove();
+
+  var bar = document.createElement('div');
+  bar.id = 'push-notif-bar';
+  bar.style.cssText = [
+    'position:fixed;top:0;left:0;right:0;z-index:9997',
+    'background:linear-gradient(135deg,#0056A4,#003d7a)',
+    'color:#fff;padding:12px 16px;display:flex;align-items:flex-start;gap:10px',
+    'box-shadow:0 4px 20px rgba(0,0,0,.4);animation:adminFadeIn .3s ease'
+  ].join(';');
+
+  bar.innerHTML =
+    '<span style="font-size:22px;flex-shrink:0">📡</span>' +
+    '<div style="flex:1;min-width:0">' +
+      '<div style="font-family:Sora,sans-serif;font-size:13px;font-weight:600;margin-bottom:2px">' + (title||'Commune de Sainte-Ode') + '</div>' +
+      '<div style="font-size:12px;opacity:.85;line-height:1.4">' + (body||'') + '</div>' +
+    '</div>' +
+    '<button onclick="document.getElementById(\'push-notif-bar\').remove()" ' +
+      'style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px;flex-shrink:0">✕</button>';
+
+  document.body.appendChild(bar);
+
+  /* Aussi l'ajouter dans le chat comme message bot */
+  if (typeof addMsg === 'function') {
+    addMsg('bot', '📡 **' + (title||'Alerte commune') + '**\n\n' + (body||''));
+  }
+
+  /* Disparaît automatiquement après 30 secondes */
+  setTimeout(function() {
+    var el = document.getElementById('push-notif-bar');
+    if (el) el.remove();
+  }, 30000);
+}
 }
 </script>
 
