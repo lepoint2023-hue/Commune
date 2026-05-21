@@ -1,19 +1,19 @@
 'use strict';
-
+ 
 const STT_LANG = {
   fr: 'fr-BE', nl: 'nl-BE', en: 'en-GB',
   de: 'de-DE', es: 'es-ES', ar: 'ar-SA',
 };
-
+ 
 const PREFERRED_VOICES = {
-  fr: ['Google français',          'Amélie',   'Marie',    'Audrey',   'Virginie' ],
+  fr: ['Google Belgique', 'Google Belgian French', 'fr-BE', 'Google français', 'Amélie', 'Marie', 'Audrey', 'Virginie'],
   nl: ['Google Nederlands',        'Ellen',    'Xander'                            ],
   en: ['Google UK English Female', 'Samantha', 'Karen',    'Moira',    'Serena'   ],
   de: ['Google Deutsch',           'Anna',     'Petra'                             ],
   es: ['Google español',           'Monica',   'Paulina'                           ],
   ar: ['Google العربية',           'Maged'                                         ],
 };
-
+ 
 const FEMALE_HINTS = [
   'female','femme','woman',
   'amélie','marie','audrey','virginie',
@@ -22,7 +22,7 @@ const FEMALE_HINTS = [
   'monica','paulina',
   'ellen','denise','zira','allison','ava',
 ];
-
+ 
 const VLABELS = {
   idle:      { fr:'Appuyez pour parler',           nl:'Druk om te spreken',              en:'Press to speak',               de:'Drücken zum Sprechen',          es:'Presione para hablar',       ar:'اضغط للتحدث'         },
   listening: { fr:'Je vous écoute…',               nl:'Ik luister…',                     en:"I'm listening…",               de:'Ich höre zu…',                  es:'Le escucho…',                ar:'أستمع إليك…'          },
@@ -31,22 +31,22 @@ const VLABELS = {
   error_stt: { fr:'Micro non disponible',          nl:'Microfoon niet beschikbaar',      en:'Microphone unavailable',       de:'Mikrofon nicht verfügbar',      es:'Micrófono no disponible',    ar:'الميكروفون غير متاح'  },
   unavail:   { fr:'Voix non dispo sur cet appareil', nl:'Stem niet beschikbaar',         en:'Voice not available',          de:'Stimme nicht verfügbar',        es:'Voz no disponible',          ar:'الصوت غير متاح'       },
 };
-
+ 
 const _voiceCache = {};
-
+ 
 let _voiceOpen   = false;
 let _recognition = null;
 let _voiceState  = 'idle';
 let _loopEnabled = false;
 let _speaking    = false;
-
+ 
 function _lang() { return (typeof lang === 'string' && lang) ? lang : 'fr'; }
-
+ 
 function _label(key) {
   const l = _lang();
   return (VLABELS[key] || VLABELS.idle)[l] || (VLABELS[key] || VLABELS.idle).fr;
 }
-
+ 
 function _plain(text) {
   return text
     /* Emojis et symboles Unicode */
@@ -68,36 +68,46 @@ function _plain(text) {
     .replace(/\n{2,}/g,                 '. ')
     .replace(/\n/g,                     ' ')
     .replace(/\s{2,}/g,                 ' ')
+    /* Nombres belges — septante / nonante */
+    .replace(/\b70\b/g, 'septante')
+    .replace(/\b71\b/g, 'septante et un')
+    .replace(/\b7([2-9])\b/g, function(_, d){ return 'septante-'+['deux','trois','quatre','cinq','six','sept','huit','neuf'][d-2]; })
+    .replace(/\b90\b/g, 'nonante')
+    .replace(/\b91\b/g, 'nonante et un')
+    .replace(/\b9([2-9])\b/g, function(_, d){ return 'nonante-'+['deux','trois','quatre','cinq','six','sept','huit','neuf'][d-2]; })
     .trim();
 }
-
+ 
 function _isFemale(voice) {
   const n = (voice.name + ' ' + voice.voiceURI).toLowerCase();
   return FEMALE_HINTS.some(h => n.includes(h));
 }
-
+ 
 function _pickVoice(l) {
   if (_voiceCache[l]) return _voiceCache[l];
-
+ 
   const all    = window.speechSynthesis.getVoices();
   if (!all.length) return null;
-
-  const inLang = all.filter(v => v.lang.toLowerCase().startsWith(l.toLowerCase()));
+ 
+  const inLang = l === 'fr'
+    ? all.filter(v => v.lang.toLowerCase().startsWith('fr-be'))
+        .concat(all.filter(v => v.lang.toLowerCase().startsWith('fr') && !v.lang.toLowerCase().startsWith('fr-be')))
+    : all.filter(v => v.lang.toLowerCase().startsWith(l.toLowerCase()));
   if (!inLang.length) { _voiceCache[l] = all[0]; return all[0]; }
-
+ 
   const preferred = PREFERRED_VOICES[l] || [];
   for (const name of preferred) {
     const hit = inLang.find(v => v.name.toLowerCase().includes(name.toLowerCase()));
     if (hit) { _voiceCache[l] = hit; return hit; }
   }
-
+ 
   const female = inLang.find(v => _isFemale(v));
   if (female) { _voiceCache[l] = female; return female; }
-
+ 
   _voiceCache[l] = inLang[0];
   return inLang[0];
 }
-
+ 
 function _ensureVoices(cb) {
   if (window.speechSynthesis.getVoices().length > 0) { cb(); return; }
   window.speechSynthesis.addEventListener('voiceschanged', function once() {
@@ -105,7 +115,7 @@ function _ensureVoices(cb) {
     cb();
   });
 }
-
+ 
 function _setState(state) {
   _voiceState = state;
   const orb    = document.getElementById('voice-orb');
@@ -117,13 +127,13 @@ function _setState(state) {
   status.textContent = _label(state);
   if (micBtn) micBtn.className = 'voice-mic-btn' + (state === 'listening' ? ' listening' : '');
 }
-
+ 
 function _addTranscript(role, text) {
   const box = document.getElementById('voice-transcript');
   if (!box) return;
   const div = document.createElement('div');
   div.className = role === 'user' ? 'vt-user' : 'vt-bot';
-
+ 
   if (role === 'bot') {
     let safe = text.length > 800 ? text.slice(0, 797) + '…' : text;
     safe = safe.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -149,16 +159,16 @@ function _addTranscript(role, text) {
   } else {
     div.textContent = text.length > 200 ? text.slice(0, 197) + '…' : text;
   }
-
+ 
   box.appendChild(div);
   setTimeout(() => { box.scrollTop = box.scrollHeight; }, 0);
 }
-
+ 
 function _stopSpeaking() {
   if (window.speechSynthesis) window.speechSynthesis.cancel();
   _speaking = false;
 }
-
+ 
 function _splitSentences(text) {
   const raw = text.replace(/([.!?:—])\s+/g, '$1\n').split('\n');
   const chunks = [];
@@ -176,26 +186,26 @@ function _splitSentences(text) {
   if (current.trim()) chunks.push(current.trim());
   return chunks.length ? chunks : [text];
 }
-
+ 
 function speakText(rawText, onDone) {
   const clean = _plain(rawText);
   if (!clean) { if (onDone) onDone(); return; }
   _stopSpeaking();
-
+ 
   _ensureVoices(() => {
     if (!window.speechSynthesis) { if (onDone) onDone(); return; }
-
+ 
     if (_voiceOpen) _setState('speaking');
     _speaking = true;
-
+ 
     const stopBtn = document.getElementById('stop-btn');
     if (stopBtn) stopBtn.classList.add('visible');
-
+ 
     const l      = _lang();
     const voice  = _pickVoice(l);
     const chunks = _splitSentences(clean);
     let   idx    = 0;
-
+ 
     function speakNext() {
       if (!_speaking || idx >= chunks.length) {
         _speaking = false;
@@ -204,22 +214,22 @@ function speakText(rawText, onDone) {
         if (onDone) onDone();
         return;
       }
-
+ 
       const utt  = new SpeechSynthesisUtterance(chunks[idx++]);
       utt.lang   = STT_LANG[l] || 'fr-BE';
       utt.rate   = 0.93;
       utt.pitch  = 1.08;
       utt.volume = 1.0;
       if (voice) utt.voice = voice;
-
+ 
       utt.onend = () => setTimeout(speakNext, 120);
-
+ 
       utt.onerror = (e) => {
         if (e.error === 'interrupted') return;
         console.warn('[Ode Voice] TTS chunk', idx, ':', e.error);
         setTimeout(speakNext, 200);
       };
-
+ 
       if (/Android|Chrome/i.test(navigator.userAgent)) {
         let lastCheck = Date.now();
         const ticker = setInterval(function() {
@@ -236,10 +246,10 @@ function speakText(rawText, onDone) {
         utt.onend   = function() { clearInterval(ticker); origEnd(); };
         utt.onerror = function(e) { clearInterval(ticker); origErr(e); };
       }
-
+ 
       window.speechSynthesis.speak(utt);
     }
-
+ 
     speakNext();
   });
 }
@@ -250,7 +260,7 @@ function _onSpeakEnd() {
     _setState('idle');
   }
 }
-
+ 
 function stopVoicePlayback() {
   _loopEnabled = false;
   _stopSpeaking();
@@ -258,37 +268,37 @@ function stopVoicePlayback() {
   if (stopBtn) stopBtn.classList.remove('visible');
   _setState('idle');
 }
-
+ 
 function startListening() {
   if (!_voiceOpen) return;
-
+ 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { _setState('error_stt'); return; }
-
+ 
   _stopSpeaking();
   if (_recognition) { try { _recognition.abort(); } catch (e) {} }
-
+ 
   const l = _lang();
   _recognition                 = new SR();
   _recognition.lang            = STT_LANG[l] || 'fr-BE';
   _recognition.continuous      = false;
   _recognition.interimResults  = false;
   _recognition.maxAlternatives = 1;
-
+ 
   _recognition.onstart = () => _setState('listening');
-
+ 
   _recognition.onresult = async (event) => {
     const transcript = event.results[0]?.[0]?.transcript?.trim();
     if (!transcript) { startListening(); return; }
-
+ 
     _addTranscript('user', transcript);
     _setState('thinking');
     _loopEnabled = true;
-
+ 
     if (typeof addMsg     === 'function') addMsg('user', transcript);
     if (typeof callGemini === 'function') await callGemini(transcript);
   };
-
+ 
   _recognition.onerror = (e) => {
     if (e.error === 'aborted')   return;
     if (e.error === 'no-speech') { if (_voiceOpen) startListening(); return; }
@@ -296,18 +306,18 @@ function startListening() {
     _setState('error_stt');
     setTimeout(() => { if (_voiceOpen) _setState('idle'); }, 2000);
   };
-
+ 
   _recognition.onend = () => {
     if (_voiceOpen && _voiceState === 'listening') setTimeout(startListening, 200);
   };
-
+ 
   _recognition.start();
 }
-
+ 
 function _stopListening() {
   if (_recognition) { try { _recognition.abort(); } catch (e) {} _recognition = null; }
 }
-
+ 
 function openVoiceOverlay() {
   const overlay = document.getElementById('voice-overlay');
   if (!overlay) return;
@@ -319,7 +329,7 @@ function openVoiceOverlay() {
   _setState('idle');
   setTimeout(startListening, 350);
 }
-
+ 
 function closeVoiceOverlay() {
   _voiceOpen   = false;
   _loopEnabled = false;
@@ -331,7 +341,7 @@ function closeVoiceOverlay() {
   const micBtn = document.getElementById('mic-btn');
   if (micBtn) micBtn.classList.remove('listening');
 }
-
+ 
 function toggleInlineMic() {
   if (_voiceOpen) { closeVoiceOverlay(); }
   else {
@@ -340,17 +350,17 @@ function toggleInlineMic() {
     if (micBtn) micBtn.classList.add('listening');
   }
 }
-
+ 
 function toggleVoiceMic() {
   if (_voiceState === 'listening') { _stopListening(); _setState('idle'); }
   else { startListening(); }
 }
-
+ 
 (function _watchMessages() {
   function attach() {
     const area = document.getElementById('messages');
     if (!area) { setTimeout(attach, 200); return; }
-
+ 
     new MutationObserver((mutations) => {
       if (!_voiceOpen) return;
       for (const mutation of mutations) {
@@ -367,20 +377,20 @@ function toggleVoiceMic() {
       }
     }).observe(area, { childList: true });
   }
-
+ 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', attach);
   } else {
     attach();
   }
 })();
-
+ 
 function checkStatusOnLoad() {
   if (typeof window.exhaustedUntil !== 'undefined' && Date.now() < window.exhaustedUntil) {
     if (typeof setStatus === 'function') setStatus('quota');
   }
 }
-
+ 
 window.openVoiceOverlay  = openVoiceOverlay;
 window.closeVoiceOverlay = closeVoiceOverlay;
 window.toggleVoiceMic    = toggleVoiceMic;
