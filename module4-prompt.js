@@ -104,9 +104,9 @@ ${safeId ? `Service choisi : **${svcLabel}**. Priorité à ce domaine.` : ''}
 ⚠️ CPAS : NE PAS introduire ni expliquer ce qu'est le CPAS. Aller directement aux services pratiques et aux contacts. Présenter l'équipe avec leurs spécialités et horaires de permanence.
 
 ## TARIFS DOCUMENTS (2026-2031)
-- Carte identité : 5,80 EUR (adulte) | 0,90 EUR (enfant ≤12 ans) | GRATUIT si vol avec PV police
+- Carte identité : 24,70 EUR (adulte) | 7,90 EUR (enfant ≤12 ans) | GRATUIT si vol avec PV police | Urgence plus de 100€
 - Passeport : 15 EUR (adulte) | 6 EUR (enfant ≤12 ans)
-- Permis conduire : 5 EUR | International : 5 EUR | Naturalisation : 20 EUR
+- Permis conduire : 25 EUR | International : 25 EUR | Naturalisation : 20 EUR
 - Étrangers CIE : 5,80 EUR | Kids séjour : 0,90 EUR | Attestation orange : GRATUIT
 
 ## PROCÉDURES CLÉS
