@@ -131,8 +131,9 @@ function _plain(text) {
       return m;
     })
     /* ── Corrections de prononciation locales ── */
-    .replace(/\bFays\b/g, 'Failli')   /* Pierre-Yves Fays → "Failli" comme "taille" */
-    .trim();
+.replace(/\bFays\b/g, 'Failli')        /* Pierre-Yves Fays → "Failli" comme "taille" */
+.replace(/\bRaskin[e]?\b/g, 'Raskinn') /* Raskin/Raskine → "inn" comme "bain" */
+.trim();
 }
 
 function _isFemale(voice) {
