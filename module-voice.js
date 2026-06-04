@@ -132,7 +132,7 @@ function _plain(text) {
     })
     /* ── Corrections de prononciation locales ── */
 .replace(/\bFays\b/g, 'Failli')        /* Pierre-Yves Fays → "Failli" comme "taille" */
-.replace(/\bRaskin[e]?\b/g, 'Raskinn') /* Raskin/Raskine → "inn" comme "bain" */
+.replace(/\bRaskin[e]?\b/g, 'Raskain')  // "ain" comme "main", "pain"
 .trim();
 }
 
