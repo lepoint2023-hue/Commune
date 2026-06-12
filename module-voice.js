@@ -142,7 +142,7 @@ function _plain(text) {
     })
     /* ── Corrections de prononciation locales ── */
 .replace(/\bFays\b/gi,   'Fayis')
-.replace(/\bRaskin\b/gi, 'Raskein')
+.replace(/\bRaskin\b/gi, 'Raskin')
 .trim();
 }
 
