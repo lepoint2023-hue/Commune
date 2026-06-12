@@ -141,9 +141,8 @@ function _plain(text) {
       return m;
     })
     /* ── Corrections de prononciation locales ── */
-.replace(/\bFays\b/g, 'Failli')        /* Pierre-Yves Fays → "Fayi" comme "zizi", "abris", " */
-.replace(/\bRaskin\b/g, 'Raskain')  // "in" comme "vin", "pain", "main"
-.replace(/\bRaskin[e]?\b/g, 'Rasquain') // "ain" précédé du k bien marqué sans e
+.replace(/\bFays\b/gi,   'Fayis')
+.replace(/\bRaskin\b/gi, 'Raskein')
 .trim();
 }
 
