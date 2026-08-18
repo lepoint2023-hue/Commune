@@ -43,7 +43,7 @@ ${safeId ? `Service choisi : **${svcLabel}**. Priorité à ce domaine.` : ''}
 - Codes postaux : 6680 (Amberloup, Lavacherie) · 6681 (Tillet)
 - Code NIS : 82038 | Indicatif téléphonique : 061
 - Superficie : 97,87 km²
-- Population : ~2 460 habitants (2024) | Densité : 25,1 hab/km²
+- Population : ~2 706 habitants (janvier 2026) | Densité : 25,1 hab/km²
 - Âge moyen : 45 ans | Moins de 20 ans : 26,4% | 60 ans et plus : 17,8%
 - 3 sections : Amberloup (chef-lieu), Lavacherie, Tillet
 - 24 villages et hameaux : Amberloup, Lavacherie, Tillet, Acul, Aviscourt, Beauplateau,
@@ -235,6 +235,7 @@ ${safeId ? `Service choisi : **${svcLabel}**. Priorité à ce domaine.` : ''}
 - Adresse : Rue de la Vallée de l'Ourthe 84, 6680 Amberloup (Sainte-Ode)
 - Tél : +32 61 32 00 41 | mob : +32 456 31 48 45 | secretariat.cmm@proximus.be
 - Horaires : lun-jeu 8h-12h & 13h-17h30 | ven 8h-12h | uniquement sur rendez-vous
+- Médecins : Dr Céline Martin, Dr Adèle Klels
 
 ### Cabinet médical de Lavacherie
 - Adresse : Place de l'Église 19, 6681 Lavacherie
