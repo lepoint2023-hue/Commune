@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>OdeBot – Banc d'essai IA</title>
+<style>
+  :root{--bg:#f4f6fa;--card:#fff;--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--blue:#1d4ed8;--green:#047857;--red:#b91c1c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  main{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  label{display:block;font-weight:600;margin:10px 0 4px}
+  input,select,textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  textarea{resize:vertical}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+  .row>*{flex:1 1 220px}
+  button{font:inherit;font-weight:600;padding:9px 16px;border:none;border-radius:8px;background:var(--blue);color:#fff;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}
+  .hint{color:var(--muted);font-size:12.5px;margin-top:4px}
+  .status{margin-top:8px;font-size:13px}
+  .ok{color:var(--green)} .err{color:var(--red)}
+  .q{font-weight:700;margin:0 0 10px}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .col{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fafbfc}
+  .col h3{margin:0 0 6px;font-size:14px}
+  .meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .meta b{color:var(--ink)}
+  .ans{white-space:pre-wrap;font-size:13.5px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Banc d'essai IA — OdeBot</h1>
+  <p class="sub">Compare les réponses, la vitesse et le coût de plusieurs IA sur les mêmes questions. Page réservée à l'administrateur : les citoyens ne sont pas concernés et ces tests ne sont pas comptés dans les statistiques.</p>
+
+  <div class="card" id="login-card">
+    <label for="pwd">Mot de passe du Command Center</label>
+    <div class="row">
+      <input type="password" id="pwd" autocomplete="current-password">
+      <div style="flex:0 0 auto"><button id="login-btn">Se connecter</button></div>
+    </div>
+    <div class="status" id="login-status"></div>
+  </div>
+
+  <div class="card hidden" id="test-card">
+    <div class="row">
+      <div>
+        <label for="mode">Comparaison</label>
+        <select id="mode" autocomplete="off">
+          <optgroup label="Via OpenRouter (clé actuelle, rien à créer)">
+            <option value="ab">Llama (actuel) vs Mistral Small 4 — même prompt</option>
+            <option value="all">Llama vs Mistral Small 4 vs Mistral Large 4 — même prompt</option>
+            <option value="prompt-llama">Prompt actuel vs prompt allégé — avec Llama</option>
+            <option value="prompt-mistral">Prompt actuel vs prompt allégé — avec Mistral Small 4</option>
+          </optgroup>
+          <optgroup label="Mistral direct, serveurs UE (clé MISTRAL_KEY requise)">
+            <option value="ab-direct">Llama (actuel) vs Mistral Small direct UE</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <div id="custom-wrap" class="hidden">
+      <label for="custom">Prompt allégé à tester</label>
+      <textarea id="custom" rows="6" placeholder="Colle ici le contenu complet du prompt allégé…"></textarea>
+      <div class="hint">Ce prompt n'est utilisé que pour ce test : le prompt du bot (KV) n'est pas modifié.</div>
+    </div>
+
+    <label for="questions">Questions (une par ligne)</label>
+    <textarea id="questions" rows="8">Combien coûte une carte d'identité ?
+Quand passent les poubelles PMC ?
+Je veux réserver la salle de Lavacherie pour un anniversaire, combien ça coûte ?
+Comment signaler un nid-de-poule ?
+Qui contacter pour une aide pour payer ma facture d'électricité ?
+Y a-t-il un club de ping-pong ?
+Wanneer is het gemeentehuis open?</textarea>
+    <div class="hint">Chaque question est envoyée seule (sans historique de conversation). Prévois ± 5 à 15 secondes par question.</div>
+
+    <div style="margin-top:12px"><button id="run-btn">Lancer le test</button></div>
+    <div class="status" id="run-status"></div>
+  </div>
+
+  <div class="card hidden" id="summary-card">
+    <h2 style="font-size:16px;margin:0 0 8px">Résumé</h2>
+    <table id="summary"></table>
+    <div class="hint">Coûts estimés en dollars. « Pour 6 000 questions » ≈ un mois avec 200 questions par jour. Pour Mistral, le cache (partie « en cache ») peut fortement baisser le prix dès que le même prompt est réutilisé.</div>
+  </div>
+
+  <div id="results"></div>
+</main>
+
+<script>
+(function () {
+  var WORKER = 'https://ode-push.lepoint2023.workers.dev';
+  var token = null;                      /* gardé en mémoire uniquement */
+  var MODES = {
+    'ab':             [{engine:'llama',prompt:'kv'},{engine:'mistral-small-or',prompt:'kv'}],
+    'all':            [{engine:'llama',prompt:'kv'},{engine:'mistral-small-or',prompt:'kv'},{engine:'mistral-large-or',prompt:'kv'}],
+    'prompt-llama':   [{engine:'llama',prompt:'kv'},{engine:'llama',prompt:'custom'}],
+    'prompt-mistral': [{engine:'mistral-small-or',prompt:'kv'},{engine:'mistral-small-or',prompt:'custom'}],
+    'ab-direct':      [{engine:'llama',prompt:'kv'},{engine:'mistral-small',prompt:'kv'}]
+  };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function setStatus(el, msg, cls) { el.textContent = msg; el.className = 'status ' + (cls || ''); }
+  function fmtUsd(v) { return (v === null || v === undefined) ? '—' : '$' + v.toFixed(v < 0.01 ? 5 : 3); }
+
+  function syncCustom() {
+    $('custom-wrap').classList.toggle('hidden', $('mode').value.indexOf('prompt-') !== 0);
+  }
+  $('mode').addEventListener('change', syncCustom);
+  $('mode').addEventListener('input', syncCustom);
+  /* Le navigateur peut restaurer le choix précédent après un rechargement
+     sans déclencher "change" : on synchronise aussi au chargement. */
+  window.addEventListener('pageshow', syncCustom);
+  syncCustom();
+
+  $('login-btn').addEventListener('click', async function () {
+    var st = $('login-status');
+    setStatus(st, 'Connexion…');
+    try {
+      var r = await fetch(WORKER + '/auth', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ password: $('pwd').value })
+      });
+      var d = await r.json();
+      if (!r.ok || !d.token) { setStatus(st, d.error || ('Échec (' + r.status + ')'), 'err'); return; }
+      token = d.token;
+      $('pwd').value = '';
+      $('login-card').classList.add('hidden');
+      $('test-card').classList.remove('hidden');
+    } catch (e) { setStatus(st, 'Erreur : ' + e.message, 'err'); }
+  });
+  $('pwd').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('login-btn').click(); });
+
+  function renderResult(question, results) {
+    var card = document.createElement('div'); card.className = 'card';
+    var q = document.createElement('p'); q.className = 'q'; q.textContent = '❓ ' + question; card.appendChild(q);
+    var cols = document.createElement('div'); cols.className = 'cols';
+    results.forEach(function (res) {
+      var col = document.createElement('div'); col.className = 'col';
+      var h = document.createElement('h3');
+      h.textContent = (res.label || res.engine) + ' · prompt ' + (res.prompt || '?');
+      col.appendChild(h);
+      var meta = document.createElement('div'); meta.className = 'meta';
+      if (res.ok) {
+        meta.innerHTML = '⏱ <b>' + (res.ms / 1000).toFixed(1) + ' s</b> · tokens envoyés <b>' + res.tokensIn + '</b>'
+          + (res.tokensCached ? ' (dont ' + res.tokensCached + ' en cache)' : '')
+          + ' · réponse <b>' + res.tokensOut + '</b> · coût <b>' + fmtUsd(res.costUsd) + '</b>'
+          + '<br>servi par : ' + String(res.servedBy || '').replace(/[<>&]/g, '');
+      } else {
+        meta.innerHTML = '<span class="err">Erreur</span>';
+      }
+      col.appendChild(meta);
+      if (res.warning) {
+        var w = document.createElement('div');
+        w.className = 'meta err'; w.textContent = res.warning;
+        col.appendChild(w);
+      }
+      var ans = document.createElement('div'); ans.className = 'ans';
+      ans.textContent = res.ok ? res.text : (res.error || 'Erreur inconnue');
+      col.appendChild(ans);
+      cols.appendChild(col);
+    });
+    card.appendChild(cols);
+    $('results').appendChild(card);
+  }
+
+  function renderSummary(all) {
+    var agg = {};
+    all.forEach(function (res) {
+      var key = (res.label || res.engine) + ' · prompt ' + res.prompt;
+      var a = agg[key] || (agg[key] = { n: 0, ms: 0, cost: 0, costN: 0, tin: 0, err: 0 });
+      if (!res.ok) { a.err++; return; }
+      a.n++; a.ms += res.ms; a.tin += res.tokensIn;
+      if (typeof res.costUsd === 'number') { a.cost += res.costUsd; a.costN++; }
+    });
+    var html = '<tr><th>Moteur</th><th>Réponses</th><th>Temps moyen</th><th>Tokens envoyés (moy.)</th><th>Coût moyen / question</th><th>Pour 6 000 questions</th></tr>';
+    Object.keys(agg).forEach(function (k) {
+      var a = agg[k];
+      var avgCost = a.costN ? a.cost / a.costN : null;
+      html += '<tr><td>' + k.replace(/[<>&]/g, '') + '</td><td>' + a.n + (a.err ? ' (+' + a.err + ' erreur(s))' : '') + '</td>'
+        + '<td>' + (a.n ? (a.ms / a.n / 1000).toFixed(1) + ' s' : '—') + '</td>'
+        + '<td>' + (a.n ? Math.round(a.tin / a.n) : '—') + '</td>'
+        + '<td>' + fmtUsd(avgCost) + '</td>'
+        + '<td>' + (avgCost !== null ? '$' + (avgCost * 6000).toFixed(2) : '—') + '</td></tr>';
+    });
+    $('summary').innerHTML = html;
+    $('summary-card').classList.remove('hidden');
+  }
+
+  $('run-btn').addEventListener('click', async function () {
+    var btn = this, st = $('run-status');
+    var mode = $('mode').value, runs = MODES[mode];
+    var custom = $('custom').value.trim();
+    if (mode.indexOf('prompt-') === 0 && !custom) {
+      syncCustom();
+      setStatus(st, 'Colle d\'abord le prompt allégé dans la case « Prompt allégé à tester » (juste sous le choix de comparaison).', 'err');
+      $('custom').focus();
+      return;
+    }
+    var questions = $('questions').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+    if (!questions.length) { setStatus(st, 'Ajoute au moins une question.', 'err'); return; }
+    btn.disabled = true; $('results').innerHTML = ''; $('summary-card').classList.add('hidden');
+    var all = [];
+    for (var i = 0; i < questions.length; i++) {
+      setStatus(st, 'Question ' + (i + 1) + ' / ' + questions.length + '…');
+      try {
+        var r = await fetch(WORKER + '/llm-compare', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
+          body: JSON.stringify({ question: questions[i], runs: runs, customPrompt: custom })
+        });
+        var d = await r.json();
+        if (r.status === 401) { setStatus(st, 'Session expirée : recharge la page et reconnecte-toi.', 'err'); break; }
+        if (!r.ok) { setStatus(st, d.error || ('Erreur ' + r.status), 'err'); break; }
+        renderResult(questions[i], d.results);
+        all = all.concat(d.results);
+      } catch (e) { setStatus(st, 'Erreur : ' + e.message, 'err'); break; }
+    }
+    if (all.length) { renderSummary(all); setStatus(st, 'Terminé.', 'ok'); }
+    btn.disabled = false;
+  });
+})();
+</script>
+</body>
+</html>
